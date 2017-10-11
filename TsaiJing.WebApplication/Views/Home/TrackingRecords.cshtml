@@ -1,0 +1,151 @@
+﻿@{
+    ViewBag.Title = "追蹤紀錄";
+}
+@section styles{
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.common-bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.bootstrap.min.css")" rel="stylesheet" />
+
+    <script src="@Url.Content("~/Scripts/tsaijing.js")"></script>
+}
+@section scripts{
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/cultures/kendo.culture.zh-TW.min.js")"></script>
+    <script>
+        function detailInit(e) {
+            var url = '/api/TrackingRecords';
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'GET'
+                    },
+                    update: {
+                        url: function (data) {
+                            return url + '?key=' + data.TrackingRecordId;
+                        },
+                        dataType: 'json',
+                        type: 'PUT'
+                    },
+                    destroy: {
+                        url: function (data) {
+                            return url + '?key=' + data.TrackingRecordId;
+                        },
+                        dataType: 'json',
+                        type: 'DELETE'
+                    },
+                    create: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'POST'
+                    },
+                    parameterMap: function (trackingRecord, operation) {
+                        if (operation === "update" || operation === "create") {
+                            trackingRecord.ReferralTime = kendo.toString(kendo.parseDate(trackingRecord.ReferralTime), "G");
+                        }
+                        return trackingRecord;
+                    }
+                },
+                filter: { field: "CustomerId", operator: "eq", value: e.data.Value },
+                batch: false,
+                pageSize: 15,
+                serverAggregates: true,
+                serverFiltering: true,
+                serverGrouping: true,
+                serverPaging: true,
+                serverSorting: true,
+                error: defaultError,
+                schema: {
+                    data: 'DataCollection',
+                    total: 'TotalRowCount',
+                    model: {
+                        id: 'TrackingRecordId',
+                        fields: {
+                            TrackingRecordId: { type: 'number', editable: false, nullable: true },
+                            CustomerId: { type: 'number', editable: false, defaultValue: e.data.Value },
+                            ReferralTime: { type: 'date', validation: { required: true } },
+                            BustUp: { type: 'number', nullable: true, defaultValue: null },
+                            BustDown: { type: 'number', nullable: true, defaultValue: null },
+                            MilkCapacity: { type: 'number', nullable: true, defaultValue: null },
+                            Abdominal: { type: 'number', nullable: true, defaultValue: null },
+                            Waist: { type: 'number', nullable: true, defaultValue: null },
+                            Hip: { type: 'number', nullable: true, defaultValue: null },
+                            LegLeft: { type: 'number', nullable: true, defaultValue: null },
+                            LegRight: { type: 'number', nullable: true, defaultValue: null },
+                            Design: { nullable: true, defaultValue: null },
+                            Buy: { nullable: true, defaultValue: null }
+                        }
+                    }
+                }
+            });
+
+            $("<div/>").appendTo(e.detailCell).kendoGrid({
+                dataSource: dataSource,
+                toolbar: [{ name: 'create', text: '新增追蹤紀錄' }],
+                editable: { mode: 'popup', confirmation: '您確定要刪除這筆資料嗎？' },
+                columns: [
+                    {
+                        command: [
+                            { name: 'edit', text: { edit: '修改', cancel: '取消', update: '確定' } },
+                            { name: 'destroy', text: '刪除' }
+                        ], title: "&nbsp;", width: "300px"
+                    },
+                    { field: 'ReferralTime', title: '複診時間', format: '{0:yyyy/MM/dd}' },
+                    { field: 'BustUp', title: '上胸圍', hidden: true },
+                    { field: 'BustDown', title: '下胸圍', hidden: true },
+                    { field: 'MilkCapacity', title: '乳容量', hidden: true },
+                    { field: 'Abdominal', title: '胃(腹)圍', hidden: true },
+                    { field: 'Waist', title: '腰圍', hidden: true },
+                    { field: 'Hip', title: '臀圍', hidden: true },
+                    { field: 'LegLeft', title: '左腿圍', hidden: true },
+                    { field: 'LegRight', title: '右腿圍', hidden: true },
+                    { field: 'Design', title: '設計組合' },
+                    { field: 'Buy', title: '購買組合' }
+                ]
+            });
+        }
+
+        $(document).ready(function () {
+            var url = '/Home/ReadCustomersResponse';
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'POST'
+                    }
+                },
+                serverAggregates: true,
+                serverFiltering: true,
+                serverGrouping: true,
+                serverPaging: true,
+                serverSorting: true,
+                batch: false,
+                pageSize: 20,
+                error: defaultError,
+                schema: {
+                    data: 'DataCollection',
+                    total: 'TotalRowCount',
+                    model: {
+                        id: 'Value',
+                        fields: {
+                            Value: { editable: false },
+                            Text: { editable: false }
+                        }
+                    }
+                }
+            });
+
+            $("#grid").kendoGrid({
+                dataSource: dataSource,
+                pageable: { refresh: true },
+                height: 550,
+                detailInit: detailInit,
+                columns: [
+                    { field: 'Text', title: '姓名' }
+                ]
+            });
+        });
+    </script>
+}
+<div id="grid"></div>

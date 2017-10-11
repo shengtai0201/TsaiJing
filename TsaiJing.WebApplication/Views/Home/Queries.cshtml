@@ -1,0 +1,108 @@
+﻿@{
+    ViewBag.Title = "查詢業績與獎金";
+}
+@section styles{
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.common-bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.bootstrap.min.css")" rel="stylesheet" />
+
+    <script src="@Url.Content("~/Scripts/tsaijing.js")"></script>
+}
+@section scripts{
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/cultures/kendo.culture.zh-TW.min.js")"></script>
+    <script>
+        function detailInit(e) {
+            var url = '/Home/ReadQueryDetails';
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'POST'
+                    }
+                },
+                filter: [{ field: "Year", operator: "eq", value: e.data.Year }, { field: "Month", operator: "eq", value: e.data.Month }],
+                batch: false,
+                pageSize: 15,
+                serverAggregates: true,
+                serverFiltering: true,
+                serverGrouping: true,
+                serverPaging: true,
+                serverSorting: true,
+                error: defaultError,
+                schema: {
+                    data: 'DataCollection',
+                    total: 'TotalRowCount',
+                    model: {
+                        id: 'PurchaseId',
+                        fields: {
+                            PurchaseId: { type: 'number', editable: false },
+                            Year: { type: 'number', editable: false },
+                            Month: { type: 'number', editable: false },
+                            ShipmentDate: { type: 'date', editable: false },
+                            CustomerName: { editable: false },
+                            TotalAmount: { type: 'number', editable: false }
+                        }
+                    }
+                }
+            });
+
+            $("<div/>").appendTo(e.detailCell).kendoGrid({
+                dataSource: dataSource,
+                columns: [
+                    { field: 'ShipmentDate', title: '訂購日期', format: '{0:yyyy/MM/dd}' },
+                    { field: 'CustomerName', title: '客戶' },
+                    { field: 'TotalAmount', title: '總計金額' }
+                ]
+            });
+        }
+
+        $(document).ready(function () {
+            var url = '/Home/ReadQueries';
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'POST'
+                    }
+                },
+                serverAggregates: true,
+                serverFiltering: true,
+                serverGrouping: true,
+                serverPaging: true,
+                serverSorting: true,
+                batch: false,
+                pageSize: 20,
+                error: defaultError,
+                schema: {
+                    data: 'DataCollection',
+                    total: 'TotalRowCount',
+                    model: {
+                        //id: ['Year', 'Month'],
+                        fields: {
+                            Year: { type: 'number', editable: false },
+                            Month: { type: 'number', editable: false },
+                            Performance: { type: 'number', editable: false },
+                            Bonus: { type: 'number', editable: false }
+                        }
+                    }
+                }
+            });
+
+            $("#grid").kendoGrid({
+                dataSource: dataSource,
+                pageable: { refresh: true },
+                height: 550,
+                detailInit: detailInit,
+                columns: [
+                    { field: 'Year', title: '西元年' },
+                    { field: 'Month', title: '月份' },
+                    { field: 'Performance', title: '業績' },
+                    { field: 'Bonus', title: '獎金' }
+                ]
+            });
+        });
+    </script>
+}
+<div id="grid"></div>

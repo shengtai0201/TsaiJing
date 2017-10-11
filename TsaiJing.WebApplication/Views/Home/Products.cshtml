@@ -1,0 +1,293 @@
+﻿@{
+    ViewBag.Title = "商品設定";
+}
+@section styles{
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.common-bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.bootstrap.min.css")" rel="stylesheet" />
+
+    <script src="@Url.Content("~/Scripts/tsaijing.js")"></script>
+}
+@section scripts{
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/cultures/kendo.culture.zh-TW.min.js")"></script>
+    <script>
+        function firstCategoryEditor(container, options) {
+            $('<input name="FirstCategory" required data-text-field="Text" data-value-field="Value" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    dataSource: {
+                        transport: {
+                            read: {
+                                url: '/Home/ReadCategories',
+                                dataType: 'json',
+                                type: 'POST'
+                            }
+                        }
+                    }
+                });
+        }
+
+        function firstSpecificationEditor(container, options) {
+            $('<input name="FirstSpecification" required data-text-field="Text" data-value-field="Value" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    dataSource: {
+                        serverFiltering: true,
+                        filter: { field: "Parent", operator: "eq", value: (options.model.FirstCategory ? options.model.FirstCategory.Value : null) },
+                        transport: {
+                            read: {
+                                url: '/Home/ReadSpecifications',
+                                dataType: 'json',
+                                type: 'POST'
+                            }
+                        }
+                    }
+                });
+        }
+
+        function secondCategoryEditor(container, options) {
+            $('<input name="SecondCategory" data-text-field="Text" data-value-field="Value" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    dataSource: {
+                        transport: {
+                            read: {
+                                url: '/Home/ReadCategories',
+                                dataType: 'json',
+                                type: 'POST'
+                            }
+                        }
+                    }
+                });
+        }
+
+        function secondSpecificationEditor(container, options) {
+            $('<input name="SecondSpecification" data-text-field="Text" data-value-field="Value" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    dataSource: {
+                        serverFiltering: true,
+                        filter: { field: "Parent", operator: "eq", value: (options.model.SecondCategory ? options.model.SecondCategory.Value : null) },
+                        transport: {
+                            read: {
+                                url: '/Home/ReadSpecifications',
+                                dataType: 'json',
+                                type: 'POST'
+                            }
+                        }
+                    }
+                });
+        }
+
+        function detailInit(e) {
+            var url = '/api/ProductDetails';
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'GET'
+                    },
+                    update: {
+                        url: function (data) {
+                            return url + '?key=' + data.ProductDetailId;
+                        },
+                        dataType: 'json',
+                        type: 'PUT'
+                    },
+                    destroy: {
+                        url: function (data) {
+                            return url + '?key=' + data.ProductDetailId;
+                        },
+                        dataType: 'json',
+                        type: 'DELETE'
+                    },
+                    create: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'POST'
+                    }
+                },
+                filter: { field: "ProductId", operator: "eq", value: e.data.ProductId },
+                batch: false,
+                pageSize: 15,
+                serverAggregates: true,
+                serverFiltering: true,
+                serverGrouping: true,
+                serverPaging: true,
+                serverSorting: true,
+                error: defaultError,
+                schema: {
+                    data: 'DataCollection',
+                    total: 'TotalRowCount',
+                    model: {
+                        id: 'ProductDetailId',
+                        fields: {
+                            ProductDetailId: { type: 'number', editable: false, nullable: true },
+                            ProductId: { type: 'number', editable: false, defaultValue: e.data.ProductId },
+                            FirstCategory: { type: 'object', validation: { required: true } },
+                            FirstSpecification: { type: 'object', validation: { required: true } },
+                            SecondCategory: { type: 'object' },
+                            SecondSpecification: { type: 'object', defaultValue: null },
+                            Price: { type: 'number', validation: { required: true } },
+                            SafeStock: { type: 'number', validation: { required: true } }
+                        }
+                    }
+                }
+            });
+
+            $("<div/>").appendTo(e.detailCell).kendoGrid({
+                dataSource: dataSource,
+                toolbar: [{ name: 'create', text: '新增商品明細' }],
+                editable: { mode: 'popup', confirmation: '您確定要刪除這筆資料嗎？' },
+                edit: function (e) {
+                    var productDetail = e.model;
+
+                    //if (productDetail.isNew()) {
+                    //    productDetail.FirstCategory = { Text: null, Value: null };
+                    //    productDetail.FirstSpecification = { Text: null, Value: null };
+                    //    productDetail.SecondCategory = { Text: null, Value: null };
+                    //    productDetail.SecondSpecification = { Text: null, Value: null };
+                    //}
+
+                    var firstCategory = e.container.find('input[name=FirstCategory]').data("kendoDropDownList");
+                    var firstSpecification = e.container.find('input[name=FirstSpecification]').data("kendoDropDownList");
+                    firstCategory.bind('change', function (fce) {
+                        productDetail.FirstCategory.Text = fce.sender.text();
+                        productDetail.FirstCategory.Value = fce.sender.value();
+                        productDetail.dirty = true;
+
+                        firstSpecification.options.dataSource.filter.value = fce.sender.value();
+                        firstSpecification.dataSource.fetch();
+                    });
+                    //firstSpecification.bind('change', function (fse) {
+                    //    // 修補"未知原因"的 bug
+                    //    productDetail.FirstSpecification = { Text: fse.sender.text(), Value: fse.sender.value() };
+                    //    productDetail.dirty = true;
+                    //});
+
+                    var secondCategory = e.container.find('input[name=SecondCategory]').data("kendoDropDownList");
+                    var secondSpecification = e.container.find('input[name=SecondSpecification]').data("kendoDropDownList");
+                    secondCategory.bind('change', function (sce) {
+                        productDetail.SecondCategory.Text = sce.sender.text();
+                        productDetail.SecondCategory.Value = sce.sender.value();
+                        productDetail.dirty = true;
+
+                        secondSpecification.options.dataSource.filter.value = sce.sender.value();
+                        secondSpecification.dataSource.fetch();
+                    });
+                    //secondSpecification.bind('change', function (sse) {
+                    //    productDetail.SecondSpecification = { Text: sse.sender.text(), Value: sse.sender.value() };
+                    //    productDetail.dirty = true;
+                    //});
+                },
+                columns: [
+                    {
+                        command: [
+                            { name: 'edit', text: { edit: '修改', cancel: '取消', update: '確定' } },
+                            { name: 'destroy', text: '刪除' }
+                        ], title: "&nbsp;", width: "300px"
+                    },
+                    { field: 'FirstCategory', title: '類別A', editor: firstCategoryEditor, hidden: true },
+                    {
+                        field: 'FirstSpecification', title: '規格A', template: function (productDetail) {
+                            if (productDetail.FirstSpecification)
+                                return productDetail.FirstSpecification.Text;
+                            else
+                                return null;
+                        }, editor: firstSpecificationEditor
+                    },
+                    { field: 'SecondCategory', title: '類別B', editor: secondCategoryEditor, hidden: true },
+                    {
+                        field: 'SecondSpecification', title: '規格B', template: function (productDetail) {
+                            if (productDetail.SecondSpecification)
+                                return productDetail.SecondSpecification.Text;
+                            else
+                                return null;
+                        }, editor: secondSpecificationEditor
+                    },
+                    { field: 'Price', title: '單價', format: '{0:0}' },
+                    { field: 'SafeStock', title: '安全庫存', format: '{0:0}' }
+                ]
+            });
+        }
+
+        $(document).ready(function () {
+            var url = '/api/Products';
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'GET'
+                    },
+                    update: {
+                        url: function (data) {
+                            return url + '?key=' + data.ProductId;
+                        },
+                        dataType: 'json',
+                        type: 'PUT'
+                    },
+                    destroy: {
+                        url: function (data) {
+                            return url + '?key=' + data.ProductId;
+                        },
+                        dataType: 'json',
+                        type: 'DELETE'
+                    },
+                    create: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'POST'
+                    }
+                },
+                serverAggregates: true,
+                serverFiltering: true,
+                serverGrouping: true,
+                serverPaging: true,
+                serverSorting: true,
+                batch: false,
+                pageSize: 20,
+                error: defaultError,
+                schema: {
+                    data: 'DataCollection',
+                    total: 'TotalRowCount',
+                    model: {
+                        id: 'ProductId',
+                        fields: {
+                            ProductId: { type: 'number', editable: false, nullable: true },
+                            Name: { validation: { required: true } },
+                            Price: { type: 'number', defaultValue: null },
+                            SafeStock: { type: 'number', defaultValue: null }
+                        }
+                    }
+                }
+            });
+
+            $("#grid").kendoGrid({
+                dataSource: dataSource,
+                pageable: { refresh: true },
+                height: 550,
+                detailInit: detailInit,
+                toolbar: [{ name: 'create', text: '新增商品' }],
+                editable: { mode: 'popup', confirmation: '您確定要刪除這筆資料嗎？' },
+                columns: [
+                    {
+                        command: [
+                            { name: 'edit', text: { edit: '修改', cancel: '取消', update: '確定' } },
+                            { name: 'destroy', text: '刪除' }
+                        ], title: "&nbsp;", width: "300px"
+                    },
+                    { field: 'Name', title: '品名' },
+                    { field: 'Price', title: '單價', format: '{0:0}' },
+                    { field: 'SafeStock', title: '安全庫存', format: '{0:0}' }
+                ]
+            });
+        });
+    </script>
+}
+<div id="grid"></div>

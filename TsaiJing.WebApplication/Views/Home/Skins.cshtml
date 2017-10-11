@@ -1,0 +1,97 @@
+﻿@{
+    ViewBag.Title = "美膚";
+}
+@section styles{
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.common-bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.bootstrap.min.css")" rel="stylesheet" />
+
+    <script src="@Url.Content("~/Scripts/tsaijing.js")"></script>
+}
+@section scripts{
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/cultures/kendo.culture.zh-TW.min.js")"></script>
+    <script>
+        $(document).ready(function () {
+            var url = '/api/Skins';
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'GET'
+                    },
+                    update: {
+                        url: function (data) {
+                            return url + '?key=' + data.CustomerId;
+                        },
+                        dataType: 'json',
+                        type: 'PUT'
+                    }
+                },
+                serverAggregates: true,
+                serverFiltering: true,
+                serverGrouping: true,
+                serverPaging: true,
+                serverSorting: true,
+                batch: false,
+                pageSize: 20,
+                error: defaultError,
+                schema: {
+                    data: 'DataCollection',
+                    total: 'TotalRowCount',
+                    model: {
+                        id: 'CustomerId',
+                        fields: {
+                            CustomerId: { type: 'number', editable: false },
+                            CustomerName: { editable: false },
+                            ConditionDry: { type: 'boolean', defaultValue: false },
+                            ConditionOily: { type: 'boolean', defaultValue: false },
+                            ConditionSensitivity: { type: 'boolean', defaultValue: false },
+                            ConditionMixed: { type: 'boolean', defaultValue: false },
+                            ImproveAcne: { type: 'boolean', defaultValue: false },
+                            ImproveSensitive: { type: 'boolean', defaultValue: false },
+                            ImproveWrinkle: { type: 'boolean', defaultValue: false },
+                            ImproveLargePores: { type: 'boolean', defaultValue: false },
+                            ImproveSpot: { type: 'boolean', defaultValue: false },
+                            ImproveDull: { type: 'boolean', defaultValue: false },
+                            ImprovePock: { type: 'boolean', defaultValue: false },
+                            ImproveOther: { defaultValue: null },
+                            Advice: { defaultValue: null },
+                            Detail: { defaultValue: null }
+                        }
+                    }
+                }
+            });
+
+            $("#grid").kendoGrid({
+                dataSource: dataSource,
+                pageable: { refresh: true },
+                height: 550,
+                editable: { mode: 'popup' },
+                columns: [
+                    {
+                        command: [
+                            { name: 'edit', text: { edit: '修改', cancel: '取消', update: '確定' } }
+                        ], title: "&nbsp;", width: "300px"
+                    },
+                    { field: 'CustomerName', title: '姓名' },
+                    { field: 'ConditionDry', title: '膚質狀況：乾性' },
+                    { field: 'ConditionOily', title: '膚質狀況：油性', hidden: true },
+                    { field: 'ConditionSensitivity', title: '膚質狀況：敏感性', hidden: true },
+                    { field: 'ConditionMixed', title: '膚質狀況：混合性', hidden: true },
+                    { field: 'ImproveAcne', title: '改善膚況：粉刺' },
+                    { field: 'ImproveSensitive', title: '改善膚況：敏感', hidden: true },
+                    { field: 'ImproveWrinkle', title: '改善膚況：皺紋', hidden: true },
+                    { field: 'ImproveLargePores', title: '改善膚況：毛孔粗大', hidden: true },
+                    { field: 'ImproveSpot', title: '改善膚況：斑' },
+                    { field: 'ImproveDull', title: '改善膚況：暗沉', hidden: true },
+                    { field: 'ImprovePock', title: '改善膚況：痘疤', hidden: true },
+                    { field: 'ImproveOther', title: '改善膚況：其他', hidden: true },
+                    { field: 'Advice', title: '保養建議', hidden: true },
+                    { field: 'Detail', title: '購買明細', hidden: true }
+                ]
+            });
+        });
+    </script>
+}
+<div id="grid"></div>

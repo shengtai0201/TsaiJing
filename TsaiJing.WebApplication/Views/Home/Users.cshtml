@@ -1,0 +1,123 @@
+﻿@{
+    ViewBag.Title = "使用者管理";
+}
+@section styles{
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.common-bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.bootstrap.min.css")" rel="stylesheet" />
+
+    <script src="@Url.Content("~/Scripts/tsaijing.js")"></script>
+}
+@section scripts{
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/cultures/kendo.culture.zh-TW.min.js")"></script>
+    <script>
+        function consultantEditor(container, options) {
+            $('<input name="Consultant" data-text-field="Text" data-value-field="Value" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    dataSource: {
+                        transport: {
+                            read: {
+                                url: '/Home/ReadConsultants',
+                                dataType: 'json',
+                                type: 'POST'
+                            }
+                        }
+                    }
+                });
+        }
+
+        function roleEditor(container, options) {
+            $('<input name="Role" required data-text-field="Text" data-value-field="Value" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    dataSource: {
+                        transport: {
+                            read: {
+                                url: '/Home/ReadCSGRoles',
+                                dataType: 'json',
+                                type: 'POST'
+                            }
+                        }
+                    }
+                });
+        }
+
+        $(document).ready(function () {
+            var url = '/api/Users';
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'GET'
+                    },
+                    update: {
+                        url: function (data) {
+                            return url + '?key=' + data.UserId;
+                        },
+                        dataType: 'json',
+                        type: 'PUT'
+                    }
+                },
+                serverAggregates: true,
+                serverFiltering: true,
+                serverGrouping: true,
+                serverPaging: true,
+                serverSorting: true,
+                batch: false,
+                pageSize: 20,
+                error: defaultError,
+                schema: {
+                    data: 'DataCollection',
+                    total: 'TotalRowCount',
+                    model: {
+                        id: 'UserId',
+                        fields: {
+                            UserId: { editable: false },
+                            CustomerName: { editable: false },
+                            Consultant: { type: 'object' },
+                            Role: { type: 'object', validation: { required: true } },
+                            LockedOut: { editable: true, type: 'boolean', defaultValue: false }
+                        }
+                    }
+                }
+            });
+
+            $("#grid").kendoGrid({
+                dataSource: dataSource,
+                pageable: { refresh: true },
+                height: 550,
+                editable: { mode: 'popup' },
+                columns: [
+                    {
+                        command: [
+                            { name: 'edit', text: { edit: '修改', cancel: '取消', update: '確定' } }
+                        ], title: "&nbsp;", width: "300px"
+                    },
+                    { field: 'CustomerName', title: '使用者名稱' },
+                    {
+                        field: 'Consultant', title: '輔導者', template: function (user) {
+                            if (user.Consultant)
+                                return user.Consultant.Text;
+                            else
+                                return null;
+                        }, editor: consultantEditor
+                    },
+                    {
+                        field: 'Role', title: '抬頭', template: function (user) {
+                            if (user.Role)
+                                return user.Role.Text;
+                            else
+                                return null;
+                        }, editor: roleEditor
+                    },
+                    { field: 'LockedOut', title: '凍結' }
+                ]
+            });
+        });
+    </script>
+}
+<div id="grid"></div>

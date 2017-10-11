@@ -1,0 +1,260 @@
+﻿@{
+    ViewBag.Title = "出貨";
+}
+@section styles{
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.common-bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.bootstrap.min.css")" rel="stylesheet" />
+
+    <script src="@Url.Content("~/Scripts/tsaijing.js")"></script>
+}
+@section scripts{
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/cultures/kendo.culture.zh-TW.min.js")"></script>
+    <script>
+        function customerEditor(container, options) {
+            $('<input name="Customer" required data-text-field="Text" data-value-field="Value" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    dataSource: {
+                        transport: {
+                            read: {
+                                url: '/Home/ReadCustomers',
+                                dataType: 'json',
+                                type: 'POST'
+                            }
+                        }
+                    }
+                });
+        }
+
+        function productEditor(container, options) {
+            $('<input name="Product" required data-text-field="Text" data-value-field="Value" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    dataSource: {
+                        transport: {
+                            read: {
+                                url: '/Home/ReadProducts',
+                                dataType: 'json',
+                                type: 'POST'
+                            }
+                        }
+                    }
+                });
+        }
+
+        function productDetailEditor(container, options) {
+            $('<input name="ProductDetail" data-text-field="Text" data-value-field="Value" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    cascadeFrom: "Product",
+                    dataSource: {
+                        serverFiltering: true,
+                        filter: { field: "ProductId", operator: "eq", value: (options.model.Product ? options.model.Product.Value : null) },
+                        transport: {
+                            read: {
+                                url: '/Home/ReadProductDetails',
+                                dataType: 'json',
+                                type: 'POST'
+                            }
+                        }
+                    }
+                });
+        }
+
+        function detailInit(e) {
+            var url = '/api/ShipmentDetails';
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'GET'
+                    },
+                    update: {
+                        url: function (data) {
+                            return url + '?key=' + data.ShipmentDetailId;
+                        },
+                        dataType: 'json',
+                        type: 'PUT'
+                    },
+                    destroy: {
+                        url: function (data) {
+                            return url + '?key=' + data.ShipmentDetailId;
+                        },
+                        dataType: 'json',
+                        type: 'DELETE'
+                    },
+                    create: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'POST'
+                    }
+                },
+                filter: { field: "ShipmentId", operator: "eq", value: e.data.ShipmentId },
+                batch: false,
+                pageSize: 15,
+                serverAggregates: true,
+                serverFiltering: true,
+                serverGrouping: true,
+                serverPaging: true,
+                serverSorting: true,
+                error: defaultError,
+                schema: {
+                    data: 'DataCollection',
+                    total: 'TotalRowCount',
+                    model: {
+                        id: 'ShipmentDetailId',
+                        fields: {
+                            ShipmentDetailId: { type: 'number', editable: false, nullable: true },
+                            ShipmentId: { type: 'number', editable: false, defaultValue: e.data.ShipmentId },
+                            Product: { type: 'object', defaultValue: null },
+                            ProductDetail: { type: 'object', defaultValue: null },
+                            Quantity: { type: 'number', validation: { required: true } },
+                            SubtotalAmount: { type: 'number', editable: false }
+                        }
+                    }
+                }
+            });
+
+            $("<div/>").appendTo(e.detailCell).kendoGrid({
+                dataSource: dataSource,
+                toolbar: [{ name: 'create', text: '新增出貨明細' }],
+                editable: { mode: 'popup', confirmation: '您確定要刪除這筆資料嗎？' },
+                edit: function (ie) {
+                    //debugger;
+                    var shipmentDetail = ie.model;
+
+                    var product = ie.container.find('input[name=Product]').data("kendoDropDownList");
+                    var productDetail = ie.container.find('input[name=ProductDetail]').data("kendoDropDownList");
+                    product.bind('change', function (se) {
+                        shipmentDetail.Product.Text = se.sender.text();
+                        shipmentDetail.Product.Value = se.sender.value();
+                        shipmentDetail.dirty = true;
+
+                        productDetail.options.dataSource.filter.value = se.sender.value();
+                        productDetail.dataSource.fetch();
+                    });
+                },
+                columns: [
+                    {
+                        command: [
+                            { name: 'edit', text: { edit: '修改', cancel: '取消', update: '確定' } },
+                            { name: 'destroy', text: '刪除' }
+                        ], title: "&nbsp;", width: "300px"
+                    },
+                    {
+                        field: 'Product', title: '品名', template: function (shipmentDetail) {
+                            if (shipmentDetail.Product)
+                                return shipmentDetail.Product.Text;
+                            else
+                                return null;
+                        }, editor: productEditor
+                    },
+                    {
+                        field: 'ProductDetail', title: '規格', template: function (shipmentDetail) {
+                            if (shipmentDetail.ProductDetail)
+                                return shipmentDetail.ProductDetail.Text;
+                            else
+                                return null;
+                        }, editor: productDetailEditor
+                    },
+                    { field: 'Quantity', title: '數量', format: '{0:0}' },
+                    { field: 'SubtotalAmount', title: '小計', format: '{0:0}' }
+                ]
+            });
+        }
+
+        $(document).ready(function () {
+            var url = '/api/Shipments';
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'GET'
+                    },
+                    update: {
+                        url: function (data) {
+                            return url + '?key=' + data.ShipmentId;
+                        },
+                        dataType: 'json',
+                        type: 'PUT'
+                    },
+                    destroy: {
+                        url: function (data) {
+                            return url + '?key=' + data.ShipmentId;
+                        },
+                        dataType: 'json',
+                        type: 'DELETE'
+                    },
+                    create: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'POST'
+                    },
+                    parameterMap: function (shipment, operation) {
+                        if (operation === "update" || operation === "create") {
+                            shipment.Date = kendo.toString(kendo.parseDate(shipment.Date), "G");
+                        }
+                        return shipment;
+                    }
+                },
+                serverAggregates: true,
+                serverFiltering: true,
+                serverGrouping: true,
+                serverPaging: true,
+                serverSorting: true,
+                batch: false,
+                pageSize: 20,
+                error: defaultError,
+                schema: {
+                    data: 'DataCollection',
+                    total: 'TotalRowCount',
+                    model: {
+                        id: 'ShipmentId',
+                        fields: {
+                            ShipmentId: { type: 'number', editable: false, nullable: true },
+                            Customer: { type: 'object', validation: { required: true } },
+                            Date: { type: 'date', defaultValue: new Date() },
+                            TotalAmount: { type: 'number', editable: false, defaultValue: 0 },
+                            ConsumptionRebate: { type: 'number', editable: false, nullable: true }
+                        }
+                    }
+                }
+            });
+
+            $("#grid").kendoGrid({
+                dataSource: dataSource,
+                pageable: { refresh: true },
+                height: 550,
+                detailInit: detailInit,
+                toolbar: [{ name: 'create', text: '新增出貨資料' }],
+                editable: { mode: 'popup', confirmation: '您確定要刪除這筆資料嗎？' },
+                columns: [
+                    {
+                        command: [
+                            { name: 'edit', text: { edit: '修改', cancel: '取消', update: '確定' } },
+                            { name: 'destroy', text: '刪除' }
+                        ], title: "&nbsp;", width: "300px"
+                    },
+                    {
+                        field: 'Customer', title: '客戶', template: function (shipment) {
+                            if (shipment.Customer)
+                                return shipment.Customer.Text;
+                            else
+                                return null;
+                        }, editor: customerEditor
+                    },
+                    { field: 'TotalAmount', title: '總計金額', format: '{0:0}' },
+                    { field: 'Date', title: '出貨日期', format: '{0:yyyy/MM/dd}' },
+                    { field: 'ConsumptionRebate', title: '消費回饋', format: '{0:0}' }
+                ]
+            });
+        });
+    </script>
+}
+<div id="grid"></div>

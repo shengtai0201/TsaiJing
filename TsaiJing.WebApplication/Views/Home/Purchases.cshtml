@@ -1,0 +1,261 @@
+﻿@{
+    ViewBag.Title = "進貨";
+}
+@section styles{
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.common-bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.bootstrap.min.css")" rel="stylesheet" />
+
+    <script src="@Url.Content("~/Scripts/tsaijing.js")"></script>
+}
+@section scripts{
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/cultures/kendo.culture.zh-TW.min.js")"></script>
+    <script>
+        function manufacturerEditor(container, options) {
+            $('<input name="Manufacturer" required data-text-field="Text" data-value-field="Value" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    dataSource: {
+                        transport: {
+                            read: {
+                                url: '/Home/ReadManufacturers',
+                                dataType: 'json',
+                                type: 'POST'
+                            }
+                        }
+                    }
+                });
+        }
+
+        function productEditor(container, options) {
+            $('<input name="Product" required data-text-field="Text" data-value-field="Value" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    dataSource: {
+                        transport: {
+                            read: {
+                                url: '/Home/ReadProducts',
+                                dataType: 'json',
+                                type: 'POST'
+                            }
+                        }
+                    }
+                });
+        }
+
+        function productDetailEditor(container, options) {
+            $('<input name="ProductDetail" data-text-field="Text" data-value-field="Value" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    cascadeFrom: "Product",
+                    dataSource: {
+                        serverFiltering: true,
+                        filter: { field: "ProductId", operator: "eq", value: (options.model.Product ? options.model.Product.Value : null) },
+                        transport: {
+                            read: {
+                                url: '/Home/ReadProductDetails',
+                                dataType: 'json',
+                                type: 'POST'
+                            }
+                        }
+                    }
+                });
+        }
+
+        function detailInit(e) {
+            var url = '/api/PurchaseDetails';
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'GET'
+                    },
+                    update: {
+                        url: function (data) {
+                            return url + '?key=' + data.PurchaseDetailId;
+                        },
+                        dataType: 'json',
+                        type: 'PUT'
+                    },
+                    destroy: {
+                        url: function (data) {
+                            return url + '?key=' + data.PurchaseDetailId;
+                        },
+                        dataType: 'json',
+                        type: 'DELETE'
+                    },
+                    create: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'POST'
+                    }
+                },
+                filter: { field: "PurchaseId", operator: "eq", value: e.data.PurchaseId },
+                batch: false,
+                pageSize: 15,
+                serverAggregates: true,
+                serverFiltering: true,
+                serverGrouping: true,
+                serverPaging: true,
+                serverSorting: true,
+                error: defaultError,
+                schema: {
+                    data: 'DataCollection',
+                    total: 'TotalRowCount',
+                    model: {
+                        id: 'PurchaseDetailId',
+                        fields: {
+                            PurchaseDetailId: { type: 'number', editable: false, nullable: true },
+                            PurchaseId: { type: 'number', editable: false, defaultValue: e.data.PurchaseId },
+                            Product: { type: 'object', defaultValue: null },
+                            ProductDetail: { type: 'object', defaultValue: null },
+                            Price: { type: 'number', validation: { required: true } },
+                            Inventory: { type: 'number', validation: { required: true } },
+                            SubtotalAmount: { type: 'number', editable: false }
+                        }
+                    }
+                }
+            });
+
+            $("<div/>").appendTo(e.detailCell).kendoGrid({
+                dataSource: dataSource,
+                toolbar: [{ name: 'create', text: '新增進貨明細' }],
+                editable: { mode: 'popup', confirmation: '您確定要刪除這筆資料嗎？' },
+                edit: function (e) {
+                    var purchaseDetail = e.model;
+
+                    var product = e.container.find('input[name=Product]').data("kendoDropDownList");
+                    var productDetail = e.container.find('input[name=ProductDetail]').data("kendoDropDownList");
+                    product.bind('change', function (pe) {
+                        purchaseDetail.Product.Text = pe.sender.text();
+                        purchaseDetail.Product.Value = pe.sender.value();
+                        purchaseDetail.dirty = true;
+
+                        productDetail.options.dataSource.filter.value = pe.sender.value();
+                        productDetail.dataSource.fetch();
+                    });
+                },
+                columns: [
+                    {
+                        command: [
+                            { name: 'edit', text: { edit: '修改', cancel: '取消', update: '確定' } },
+                            { name: 'destroy', text: '刪除' }
+                        ], title: "&nbsp;", width: "300px"
+                    },
+                    {
+                        field: 'Product', title: '品名', template: function (purchaseDetail) {
+                            if (purchaseDetail.Product)
+                                return purchaseDetail.Product.Text;
+                            else
+                                return null;
+                        }, editor: productEditor
+                    },
+                    {
+                        field: 'ProductDetail', title: '規格', template: function (purchaseDetail) {
+                            if (purchaseDetail.ProductDetail)
+                                return purchaseDetail.ProductDetail.Text;
+                            else
+                                return null;
+                        }, editor: productDetailEditor
+                    },
+                    { field: 'Inventory', title: '數量', format: '{0:0}' },
+                    { field: 'Price', title: '單價', format: '{0:0}' },
+                    { field: 'SubtotalAmount', title: '小計', format: '{0:0}' }
+                ]
+            });
+        }
+
+        $(document).ready(function () {
+            var url = '/api/Purchases';
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'GET'
+                    },
+                    update: {
+                        url: function (data) {
+                            return url + '?key=' + data.PurchaseId;
+                        },
+                        dataType: 'json',
+                        type: 'PUT'
+                    },
+                    destroy: {
+                        url: function (data) {
+                            return url + '?key=' + data.PurchaseId;
+                        },
+                        dataType: 'json',
+                        type: 'DELETE'
+                    },
+                    create: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'POST'
+                    },
+                    parameterMap: function (purchase, operation) {
+                        if (operation === "update" || operation === "create") {
+                            purchase.Date = kendo.toString(kendo.parseDate(purchase.Date), "G");
+                        }
+                        return purchase;
+                    }
+                },
+                serverAggregates: true,
+                serverFiltering: true,
+                serverGrouping: true,
+                serverPaging: true,
+                serverSorting: true,
+                batch: false,
+                pageSize: 20,
+                error: defaultError,
+                schema: {
+                    data: 'DataCollection',
+                    total: 'TotalRowCount',
+                    model: {
+                        id: 'PurchaseId',
+                        fields: {
+                            PurchaseId: { type: 'number', editable: false, nullable: true },
+                            Manufacturer: { type: 'object', validation: { required: true } },
+                            Date: { type: 'date', defaultValue: new Date() },
+                            TotalAmount: { type: 'number', editable: false, defaultValue: 0 },
+                            Remark: {}
+                        }
+                    }
+                }
+            });
+
+            $("#grid").kendoGrid({
+                dataSource: dataSource,
+                pageable: { refresh: true },
+                height: 550,
+                detailInit: detailInit,
+                toolbar: [{ name: 'create', text: '新增進貨資料' }],
+                editable: { mode: 'popup', confirmation: '您確定要刪除這筆資料嗎？' },
+                columns: [
+                    {
+                        command: [
+                            { name: 'edit', text: { edit: '修改', cancel: '取消', update: '確定' } },
+                            { name: 'destroy', text: '刪除' }
+                        ], title: "&nbsp;", width: "300px"
+                    },
+                    {
+                        field: 'Manufacturer', title: '廠商', template: function (purchase) {
+                            if (purchase.Manufacturer)
+                                return purchase.Manufacturer.Text;
+                            else
+                                return null;
+                        }, editor: manufacturerEditor
+                    },
+                    { field: 'TotalAmount', title: '總計金額', format: '{0:0}' },
+                    { field: 'Date', title: '採購日期', format: '{0:yyyy/MM/dd}' },
+                    { field: 'Remark', title: '備註', hidden: true }
+                ]
+            });
+        });
+    </script>
+}
+<div id="grid"></div>

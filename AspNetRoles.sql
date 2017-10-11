@@ -1,0 +1,18 @@
+﻿USE [TsaiJing]
+GO
+INSERT [dbo].[AspNetRoles] ([Id], [Name]) VALUES (N'1034D483-0661-400E-8F9A-9DD37BC7C196', N'Administrator')
+GO
+INSERT [dbo].[AspNetRoles] ([Id], [Name]) VALUES (N'38573743-2B76-46A5-BCA8-6459A91EA4D8', N'DirectStore')
+GO
+INSERT [dbo].[AspNetRoles] ([Id], [Name]) VALUES (N'393A7B4F-5102-4D83-8836-6FC2C01142C4', N'Supervise')
+GO
+INSERT [dbo].[AspNetRoles] ([Id], [Name]) VALUES (N'5C1A5555-DCB9-41EE-8D7C-3812F042FA45', N'Guidance')
+GO
+INSERT [dbo].[AspNetRoles] ([Id], [Name]) VALUES (N'A4D57EFF-96EE-480D-8125-6C133F3045C3', N'Company')
+GO
+INSERT [dbo].[AspNetRoles] ([Id], [Name]) VALUES (N'ACE83053-B67D-4F22-809B-650FF1826AAD', N'VVIP')
+GO
+INSERT [dbo].[AspNetRoles] ([Id], [Name]) VALUES (N'B921EFD9-839D-4C55-85FA-D63F626884B6', N'Customer')
+GO
+INSERT [dbo].[AspNetRoles] ([Id], [Name]) VALUES (N'C278FCC4-89FB-4BAE-B6DF-782C36318D42', N'VIP')
+GO

@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<mvcSiteMap xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://mvcsitemap.codeplex.com/schemas/MvcSiteMap-File-4.0"
+            xsi:schemaLocation="http://mvcsitemap.codeplex.com/schemas/MvcSiteMap-File-4.0 MvcSiteMapSchema.xsd">
+
+  <mvcSiteMapNode title="首頁" controller="Home" action="Index">
+    
+    <mvcSiteMapNode title="系統功能" controller="Home" action="Users">
+      <mvcSiteMapNode title="使用者管理" controller="Home" action="Users"/>
+      <mvcSiteMapNode title="廠商設定" controller="Home" action="Manufacturers"/>
+      <mvcSiteMapNode title="商品規格設定" controller="Home" action="Specifications"/>
+      <mvcSiteMapNode title="商品設定" controller="Home" action="Products"/>
+    </mvcSiteMapNode>
+
+    <mvcSiteMapNode title="客戶關係管理" controller="Home" action="Customers">
+      <mvcSiteMapNode title="基本資料" controller="Home" action="Customers"/>
+      <mvcSiteMapNode title="美體" controller="Home" action="Bodies"/>
+      <mvcSiteMapNode title="追蹤紀錄" controller="Home" action="TrackingRecords"/>
+      <mvcSiteMapNode title="美膚" controller="Home" action="Skins"/>
+      <mvcSiteMapNode title="會員申請" controller="Home" action="Members"/>
+    </mvcSiteMapNode>
+
+    <mvcSiteMapNode title="進銷存" controller="Home" action="Purchases">
+      <mvcSiteMapNode title="進貨" controller="Home" action="Purchases"/>
+      <mvcSiteMapNode title="出貨" controller="Home" action="Shipments"/>
+    </mvcSiteMapNode>
+
+    <mvcSiteMapNode title="查詢業績與獎金" controller="Home" action="Queries"/>
+    
+  </mvcSiteMapNode>
+
+</mvcSiteMap>

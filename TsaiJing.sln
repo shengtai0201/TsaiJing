@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsaiJing.WebApplication", "TsaiJing.WebApplication\TsaiJing.WebApplication.csproj", "{CCBE6F52-6F23-4826-82BC-77DBF14DDBDD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsaiJing", "TsaiJing\TsaiJing.csproj", "{2E677BA1-DBB6-4840-A105-8B963A2ACC5E}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "TsaiJing.Database", "TsaiJing.Database\TsaiJing.Database.sqlproj", "{25FB68C6-8756-4F25-8E03-835808A09215}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsaiJing.Tests", "TsaiJing.Tests\TsaiJing.Tests.csproj", "{8EDF4429-251A-416D-BB68-93F227191BCF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B2480858-7FF5-43F2-8ED4-E703C24C49FC}"
+	ProjectSection(SolutionItems) = preProject
+		AspNetRoles.sql = AspNetRoles.sql
+		會員申請書.pdf = 會員申請書.pdf
+		采凈國際客戶資料卡ver6-1.pdf = 采凈國際客戶資料卡ver6-1.pdf
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CCBE6F52-6F23-4826-82BC-77DBF14DDBDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCBE6F52-6F23-4826-82BC-77DBF14DDBDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCBE6F52-6F23-4826-82BC-77DBF14DDBDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCBE6F52-6F23-4826-82BC-77DBF14DDBDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E677BA1-DBB6-4840-A105-8B963A2ACC5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E677BA1-DBB6-4840-A105-8B963A2ACC5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E677BA1-DBB6-4840-A105-8B963A2ACC5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E677BA1-DBB6-4840-A105-8B963A2ACC5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25FB68C6-8756-4F25-8E03-835808A09215}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25FB68C6-8756-4F25-8E03-835808A09215}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25FB68C6-8756-4F25-8E03-835808A09215}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{25FB68C6-8756-4F25-8E03-835808A09215}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25FB68C6-8756-4F25-8E03-835808A09215}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25FB68C6-8756-4F25-8E03-835808A09215}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{8EDF4429-251A-416D-BB68-93F227191BCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EDF4429-251A-416D-BB68-93F227191BCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EDF4429-251A-416D-BB68-93F227191BCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EDF4429-251A-416D-BB68-93F227191BCF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FBAB31E4-CB31-4953-AA08-3566FC9F1914}
+	EndGlobalSection
+EndGlobal

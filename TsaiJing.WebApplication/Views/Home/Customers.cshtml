@@ -1,0 +1,114 @@
+﻿@{
+    ViewBag.Title = "基本資料";
+}
+@section styles{
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.common-bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/kendo/2017.2.621/kendo.bootstrap.min.css")" rel="stylesheet" />
+
+    <script src="@Url.Content("~/Scripts/tsaijing.js")"></script>
+}
+@section scripts{
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2017.2.621/cultures/kendo.culture.zh-TW.min.js")"></script>
+    <script>
+        $(document).ready(function () {
+            var url = '/api/Customers';
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'GET'
+                    },
+                    update: {
+                        url: function (data) {
+                            return url + '?key=' + data.CustomerId;
+                        },
+                        dataType: 'json',
+                        type: 'PUT'
+                    },
+                    destroy: {
+                        url: function (data) {
+                            return url + '?key=' + data.CustomerId;
+                        },
+                        dataType: 'json',
+                        type: 'DELETE'
+                    },
+                    create: {
+                        url: url,
+                        dataType: 'json',
+                        type: 'POST'
+                    },
+                    parameterMap: function (customer, operation) {
+                        if (operation === "update" || operation === "create") {
+                            customer.Birthday = kendo.toString(kendo.parseDate(customer.Birthday), "G");
+                        }
+                        return customer;
+                    }
+                },
+                serverAggregates: true,
+                serverFiltering: true,
+                serverGrouping: true,
+                serverPaging: true,
+                serverSorting: true,
+                batch: false,
+                pageSize: 20,
+                error: defaultError,
+                schema: {
+                    data: 'DataCollection',
+                    total: 'TotalRowCount',
+                    model: {
+                        id: 'CustomerId',
+                        fields: {
+                            CustomerId: { type: 'number', editable: false, nullable: true },
+                            Name: { validation: { required: true } },
+                            Phone: { validation: { required: true } },
+                            Birthday: { type: 'date', validation: { required: true } },
+                            Career: { nullable: true, defaultValue: null },
+                            Address: { validation: { required: true } },
+                            IdCardNumber: { nullable: true, defaultValue: null },
+                            Introducer: { validation: { required: true } },
+                            ConsultantName: { editable: false },
+                            Height: { type: 'number', nullable: true, defaultValue: null },
+                            Weight: { type: 'number', nullable: true, defaultValue: null },
+                            Email: { nullable: true, defaultValue: null },
+                            LineId: { nullable: true, defaultValue: null },
+                            Remark: { nullable: true, defaultValue: null }
+                        }
+                    }
+                }
+            });
+
+            $("#grid").kendoGrid({
+                dataSource: dataSource,
+                pageable: { refresh: true },
+                height: 550,
+                toolbar: [{ name: 'create', text: '新增客戶基本資料' }],
+                editable: { mode: 'popup', confirmation: '您確定要刪除這筆資料嗎？' },
+                columns: [
+                    {
+                        command: [
+                            { name: 'edit', text: { edit: '修改', cancel: '取消', update: '確定' } },
+                            { name: 'destroy', text: '刪除' }
+                        ], title: "&nbsp;", width: "300px"
+                    },
+                    { field: 'Name', title: '姓名' },
+                    { field: 'Phone', title: '電話' },
+                    { field: 'Birthday', title: '生日', format: '{0:yyyy/MM/dd}' },
+                    { field: 'Career', title: '職業', hidden: true },
+                    { field: 'Address', title: '地址' },
+                    { field: 'IdCardNumber', title: '身份證字號', hidden: true },
+                    { field: 'Introducer', title: '介紹人' },
+                    { field: 'ConsultantName', title: '技術指導' },
+                    { field: 'Height', title: '身高', format: '{0:0}', hidden: true },
+                    { field: 'Weight', title: '體重', format: '{0:0}', hidden: true },
+                    { field: 'Email', title: 'E-mail', hidden: true },
+                    { field: 'LineId', title: 'LineID', hidden: true },
+                    { field: 'Remark', title: '備註', hidden: true }
+                ]
+            });
+        });
+    </script>
+}
+<div id="grid"></div>
+

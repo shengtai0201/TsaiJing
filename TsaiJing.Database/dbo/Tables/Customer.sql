@@ -1,0 +1,25 @@
+﻿CREATE TABLE [dbo].[Customer] (
+    [CustomerId]   INT            IDENTITY (1, 1) NOT NULL,
+    [UserId]       NVARCHAR (128) NULL,
+    [Name]         NVARCHAR (64)  NOT NULL,
+    [Phone]        VARCHAR (16)   NOT NULL,
+    [Mobile]       VARCHAR (16)   NULL,
+    [Birthday]     DATETIME       NOT NULL,
+    [Career]       NVARCHAR (8)   NULL,
+    [Address]      NVARCHAR (128) NOT NULL,
+    [IdCardNumber] VARCHAR (16)   NULL,
+    [Introducer]   NVARCHAR (8)   NOT NULL,
+    [ConsultantId] NVARCHAR (128) NULL,
+    [Height]       INT            NULL,
+    [Weight]       INT            NULL,
+    [Email]        VARCHAR (32)   NULL,
+    [LineId]       VARCHAR (16)   NULL,
+    [Remark]       NVARCHAR (256) NULL,
+    [MemberDate]   DATETIME       NULL,
+    [MemberRoleId] NVARCHAR (128) NULL,
+    CONSTRAINT [PK_Customer] PRIMARY KEY CLUSTERED ([CustomerId] ASC),
+    CONSTRAINT [FK_Customer_AspNetRoles] FOREIGN KEY ([MemberRoleId]) REFERENCES [dbo].[AspNetRoles] ([Id]),
+    CONSTRAINT [FK_Customer_AspNetUsers] FOREIGN KEY ([UserId]) REFERENCES [dbo].[AspNetUsers] ([Id]),
+    CONSTRAINT [FK_Customer_AspNetUsers1] FOREIGN KEY ([ConsultantId]) REFERENCES [dbo].[AspNetUsers] ([Id])
+);
+
