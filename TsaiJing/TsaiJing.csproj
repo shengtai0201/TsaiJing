@@ -200,7 +200,12 @@
     <Compile Include="WebApplication\Models\TrackingRecordViewModel.cs" />
     <Compile Include="WebApplication\Models\UserViewModel.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\ClassLibrary\Shengtai\Shengtai.csproj">
+      <Project>{e3795711-141f-4f05-8b52-80b36ce48edd}</Project>
+      <Name>Shengtai</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />

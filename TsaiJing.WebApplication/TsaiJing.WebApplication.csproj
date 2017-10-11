@@ -2000,6 +2000,10 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ClassLibrary\Shengtai\Shengtai.csproj">
+      <Project>{e3795711-141f-4f05-8b52-80b36ce48edd}</Project>
+      <Name>Shengtai</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TsaiJing\TsaiJing.csproj">
       <Project>{2e677ba1-dbb6-4840-a105-8b963a2acc5e}</Project>
       <Name>TsaiJing</Name>
